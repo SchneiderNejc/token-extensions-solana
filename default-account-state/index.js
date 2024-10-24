@@ -81,7 +81,7 @@ console.log("Network:", network);
 
   console.log(
     "\nCreate Mint Account:",
-    `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+    `https://solana.fm/tx/${transactionSignature}?cluster=${network}-solana`
   );
 
   const tokenAccount = await createAccount(
@@ -123,7 +123,7 @@ console.log("Network:", network);
 
   console.log(
     "\nThaw Token Account:",
-    `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+    `https://solana.fm/tx/${transactionSignature}?cluster=${network}-solana`
   );
 
   transactionSignature = await updateDefaultAccountState(
@@ -139,6 +139,6 @@ console.log("Network:", network);
 
   console.log(
     "\nUpdate Default Mint Account State:",
-    `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+    `https://solana.fm/tx/${transactionSignature}?cluster=${network}-solana`
   );
 })();
