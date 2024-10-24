@@ -1,5 +1,15 @@
-const fs = require('fs');
-const { Keypair, Connection, clusterApiUrl, SystemProgram, Transaction, sendAndConfirmTransaction } = require("@solana/web3.js");
+// The DefaultAccountState extension introduces a valuable tool for token creators to have enhanced control of their token.
+// This feature allows for controlled token distribution, enabling mechanisms like mandatory KYC verification for token holders.
+
+const fs = require("fs");
+const {
+  Keypair,
+  Connection,
+  clusterApiUrl,
+  SystemProgram,
+  Transaction,
+  sendAndConfirmTransaction,
+} = require("@solana/web3.js");
 const {
   ExtensionType,
   TOKEN_2022_PROGRAM_ID,
@@ -10,11 +20,11 @@ const {
   createAccount,
   mintTo,
   updateDefaultAccountState,
-  thawAccount
+  thawAccount,
 } = require("@solana/spl-token");
 
 // Read the secret key from the id.json file in the project root
-const secretKey = JSON.parse(fs.readFileSync('./id.json', 'utf8'));
+const secretKey = JSON.parse(fs.readFileSync("./id.json", "utf8"));
 const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 
 // Set up the Solana network connection
@@ -24,7 +34,6 @@ const connection = new Connection(clusterApiUrl(network), "confirmed");
 // Print the wallet's public key and the network at the start
 console.log("Wallet Public Key:", payer.publicKey.toBase58());
 console.log("Network:", network);
-
 
 (async () => {
   // Get and print payer balance
@@ -53,11 +62,12 @@ console.log("Network:", network);
   });
 
   const defaultState = AccountState.Frozen;
-  const initializeDefaultAccountStateInstruction = createInitializeDefaultAccountStateInstruction(
-    mint,
-    defaultState,
-    TOKEN_2022_PROGRAM_ID
-  );
+  const initializeDefaultAccountStateInstruction =
+    createInitializeDefaultAccountStateInstruction(
+      mint,
+      defaultState,
+      TOKEN_2022_PROGRAM_ID
+    );
 
   const initializeMintInstruction = createInitializeMintInstruction(
     mint,
@@ -94,6 +104,7 @@ console.log("Network:", network);
     TOKEN_2022_PROGRAM_ID
   );
 
+    // @notice Fails unless the Freeze Authority thaws the Token Account.
   try {
     await mintTo(
       connection,
@@ -110,6 +121,7 @@ console.log("Network:", network);
     console.log("\nExpect Error:", error);
   }
 
+  // @notice Unfreeeze token account.
   transactionSignature = await thawAccount(
     connection,
     payer,
@@ -126,6 +138,7 @@ console.log("Network:", network);
     `https://solana.fm/tx/${transactionSignature}?cluster=${network}-solana`
   );
 
+    // @notice Relax the initial restriction by passing in the new account state.
   transactionSignature = await updateDefaultAccountState(
     connection,
     payer,
