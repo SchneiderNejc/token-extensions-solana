@@ -17,9 +17,19 @@ const {
 const secretKey = JSON.parse(fs.readFileSync('./id.json', 'utf8'));
 const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 
+// Set up the Solana network connection
+const network = "devnet"; // You can change this to "mainnet-beta" or "testnet" if needed
+const connection = new Connection(clusterApiUrl(network), "confirmed");
+
+// Print the wallet's public key and the network at the start
+console.log("Wallet Public Key:", payer.publicKey.toBase58());
+console.log("Network:", network);
+
+
 (async () => {
-  // Connection to devnet cluster
-  const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+  // Get and print payer balance
+  const balance = await connection.getBalance(payer.publicKey);
+  console.log("Payer Balance:", balance / 1e9, "SOL"); // Divide by 1e9 to convert lamports to SOL
 
   // Transaction signature
   let transactionSignature;
