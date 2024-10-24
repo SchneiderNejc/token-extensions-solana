@@ -61,6 +61,7 @@ console.log("Network:", network);
     programId: TOKEN_2022_PROGRAM_ID,
   });
 
+    // Set the initial state as frozen.
   const defaultState = AccountState.Frozen;
   const initializeDefaultAccountStateInstruction =
     createInitializeDefaultAccountStateInstruction(
@@ -104,6 +105,7 @@ console.log("Network:", network);
     TOKEN_2022_PROGRAM_ID
   );
 
+    // Mint tokens to created token account.
     // @notice Fails unless the Freeze Authority thaws the Token Account.
   try {
     await mintTo(
@@ -143,7 +145,7 @@ console.log("Network:", network);
     connection,
     payer,
     mint,
-    AccountState.Initialized,
+    AccountState.Initialized, // @dev Other possible states are Uninitialized, Frozen, Initialized, Closed.
     freezeAuthority,
     undefined,
     undefined,
