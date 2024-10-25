@@ -55,6 +55,7 @@ const connection = new Connection(clusterApiUrl(network), "confirmed");
   );
 
   // Submit transaction.
+  console.log("Creating mint account...");
   const transactionSignature = await sendAndConfirmTransaction(
     connection,
     transaction,
