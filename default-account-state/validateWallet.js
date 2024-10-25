@@ -2,11 +2,7 @@
 // This feature allows for controlled token distribution, enabling mechanisms like mandatory KYC verification for token holders.
 
 const fs = require("fs");
-const {
-  Keypair,
-  Connection,
-  clusterApiUrl
-} = require("@solana/web3.js");
+const { Keypair, Connection, clusterApiUrl } = require("@solana/web3.js");
 
 // Read the secret key from the id.json file in the project root
 const secretKey = JSON.parse(fs.readFileSync("./id.json", "utf8"));
@@ -23,6 +19,5 @@ console.log("Network:", network);
 (async () => {
   // Get and print payer balance
   const balance = await connection.getBalance(payer.publicKey);
-    console.log("Payer Balance:", balance / 1e9, "SOL"); // Divide by 1e9 to convert lamports to SOL
-
+  console.log("Payer Balance:", balance / 1e9, "SOL"); // Divide by 1e9 to convert lamports to SOL
 })();
