@@ -1,0 +1,14 @@
+Why Use the ImmutableOwner Extension Explicitly for Non-ATA Accounts?
+While ATAs are immutable by default, standard token accounts (i.e., non-ATAs) created under the Token-2022 program do not have the ImmutableOwner extension applied by default. This means:
+
+If you create a standard token account (not an ATA), you still have the option to make it mutable or immutable.
+In cases where ownership immutability is desired for a standard token account, you need to explicitly enable the ImmutableOwner extension when creating it.
+
+
+How to identify TA vs ATA
+
+ inspect the account details:
+
+ATA: The ATA will always have the same owner as the wallet it is associated with.
+Standard Token Account: The owner could be a different wallet or authority (e.g., for custody or escrow purposes).
+In Solana, you can fetch account information using getAccountInfo and examine the account’s properties to confirm the owner.
