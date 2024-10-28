@@ -1,20 +1,16 @@
 {
   "name": "immutable-owner",
   "version": "1.0.0",
+  "description": "Source: https://solana.com/developers/guides/token-extensions/immutable-owner\r If the owner of an existing Associated Token Account is changed, users may unintentionally transfer funds to an account under the assumption \r that it belongs to the original owner.\r With Token Extensions, Associated Token Accounts have the ImmutableOwner extension enabled by default, preventing the ownership from being changed.\r The ImmutableOwner extension can also be enabled for any new Token Account created by the Token Extension program.",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@solana/spl-token": "^0.4.9",
     "@solana/web3.js": "^1.95.4"
-  },
-  "devDependencies": {
-    "@types/node": "^22.8.0",
-    "ts-node": "^10.9.2"
   }
 }
