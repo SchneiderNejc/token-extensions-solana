@@ -13,7 +13,7 @@ const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
 // Define mint public key (substitute this with your mint public key)
-const mintPublicKey = new PublicKey("6BzArtz7u9ytVZGdKFsdj63hPP7XHL9L3DTH4CNiKtFQ");
+const mintPublicKey = new PublicKey("DqykVCokVUUQnsazEJg3UzbPXUALuc5S4ttj7EocLStD");
 
 async function initializeImmutableOwnerTokenAccount() {
   try {
