@@ -1,7 +1,7 @@
 const fs = require("fs");
 const os = require("os");
 
-const { Keypair, Connection, clusterApiUrl } = require("@solana/web3.js");
+const { Keypair, Connection, clusterApiUrl, PublicKey } = require("@solana/web3.js");
 const { setAuthority, AuthorityType, TOKEN_2022_PROGRAM_ID } = require("@solana/spl-token");
 
 // Define the path to id.json and Load wallet
@@ -13,7 +13,7 @@ const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
 // Define token account public key (substitute this with your associated token account public key)
-const tokenAccountPublicKey = "<YOUR_ASSOCIATED_TOKEN_ACCOUNT_PUBLIC_KEY>";
+const tokenAccountPublicKey = new PublicKey("EozGikr54PQ9dragdPfzFrU3YxXrxXFa3c8nQxWZ7uY3");
 
 async function changeTokenAccountOwner() {
   try {
