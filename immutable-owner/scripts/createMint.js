@@ -1,9 +1,12 @@
 const fs = require("fs");
+const os = require("os");
+
 const { Keypair, Connection, clusterApiUrl, SystemProgram, Transaction, sendAndConfirmTransaction } = require("@solana/web3.js");
 const { TOKEN_2022_PROGRAM_ID, createMint } = require("@solana/spl-token");
 
-// Load wallet
-const secretKey = JSON.parse(fs.readFileSync("./id.json", "utf8"));
+// Define the path to id.json and Load wallet
+const secretKeyPath = `${os.homedir()}/.config/solana/id.json`;
+const secretKey = JSON.parse(fs.readFileSync(secretKeyPath, "utf8"));
 const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 
 // Initialize connection to Solana devnet
