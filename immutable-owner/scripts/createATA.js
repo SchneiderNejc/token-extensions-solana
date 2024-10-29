@@ -32,4 +32,4 @@ async function createAssociatedTokenAccountForMint() {
   }
 }
 
-createAssociatedTokenAccountForMint().then(() => console.log("createAssociatedTokenAccountForMint completed"));
+createAssociatedTokenAccountForMint();

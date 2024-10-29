@@ -67,4 +67,4 @@ async function initializeImmutableOwnerTokenAccount() {
   }
 }
 
-initializeImmutableOwnerTokenAccount().then(() => console.log("initializeImmutableOwnerTokenAccount completed"));
+initializeImmutableOwnerTokenAccount();

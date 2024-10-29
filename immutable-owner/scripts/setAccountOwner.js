@@ -34,4 +34,4 @@ async function changeTokenAccountOwner() {
   }
 }
 
-changeTokenAccountOwner().then(() => console.log("changeTokenAccountOwner completed"));
+changeTokenAccountOwner();
