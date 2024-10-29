@@ -35,6 +35,11 @@ async function isATA() {
 
 
 (async () => {
-  const result = await isATA();
-  console.log("Is the given account an ATA?", result);
+    const result = await isATA(ownerPubkey, mintPubkey, tokenAccountAddress);
+
+    if (result) {
+      console.log(`${tokenAccountAddress.toBase58()} is an ATA.`);
+    } else {
+      console.log(`${tokenAccountAddress.toBase58()} isn't an ATA.`);
+    }
 })();
