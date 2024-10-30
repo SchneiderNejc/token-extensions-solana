@@ -1,7 +1,6 @@
-// updateInterestRate.js
 const fs = require("fs");
 const os = require("os");
-const { Keypair, Connection, clusterApiUrl } = require("@solana/web3.js");
+const { Keypair, Connection, clusterApiUrl, PublicKey } = require("@solana/web3.js");
 const { updateRateInterestBearingMint, TOKEN_2022_PROGRAM_ID } = require("@solana/spl-token");
 
 // Define the path to id.json and Load wallet
@@ -32,8 +31,8 @@ async function updateInterestRate(mint, rateAuthority, updateRate) {
   }
 }
 
-const mint = "YOUR_MINT_PUBLIC_KEY"; // Replace with your mint public key
+const mint = new PublicKey("6Fxvb1ZVcp5V4VdAgTr4ksCFfvbKC46iJqZEV9qvZjjq"); // Replace with your mint public key
 const rateAuthority = payer; // Rate Authority, typically the same as payer
-const updateRate = 0; // New interest rate in basis points
+const updateRate = 10; // New interest rate in basis points.
 
 updateInterestRate(mint, rateAuthority, updateRate);
