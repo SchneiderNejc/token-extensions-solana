@@ -1,7 +1,11 @@
 const fs = require("fs");
 const os = require("os");
 
-const { Keypair, Connection, clusterApiUrl, SystemProgram, Transaction, sendAndConfirmTransaction } = require("@solana/web3.js");
+const {
+  Keypair,
+  Connection,
+  clusterApiUrl,
+} = require("@solana/web3.js");
 const { TOKEN_2022_PROGRAM_ID, createMint } = require("@solana/spl-token");
 
 // Define the path to id.json and Load wallet

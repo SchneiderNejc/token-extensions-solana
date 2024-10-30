@@ -12,15 +12,18 @@ If you create a standard token account (not an ATA), you still have the option t
 In cases where ownership immutability is desired for a standard token account, you need to explicitly enable the ImmutableOwner extension when creating it.
 
 
-Commands:
+Commands
 npm init -y
 npm install @solana/web3.js @solana/spl-token
 ensure wallet is present in ~/.config/solana/id.json.
 
+Main Scripts:
 update corresponding mint/TA publicKey in each script.
 node createMint.js		Create a new mint.
 node createATA.js		Create ATA for new mint. Has immutable owner by default.
+
+Optional scripts:
 node setAccountOwner.js		Change account owner. Will fail with immutable owner TA.
-node initImmutableOwnerTA.js	Explicitly create immutable owner TA. Result is the same as using createMint + createATA
+node initImmutableOwnerTA.js	Explicitly create immutable owner TA. Result is the same as using createMint + createATA. Suitable for runnint on standard TAs.
 node isATA.js			Is existing TA an ATA? Should return true/false, but it's always false.
 
