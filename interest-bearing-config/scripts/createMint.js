@@ -1,8 +1,13 @@
-// createMint.js
 const fs = require("fs");
 const os = require("os");
-const { Keypair, Connection, clusterApiUrl } = require("@solana/web3.js");
-const { TOKEN_2022_PROGRAM_ID, createMint } = require("@solana/spl-token");
+const { Keypair, Connection, clusterApiUrl, SystemProgram, Transaction, sendAndConfirmTransaction } = require("@solana/web3.js");
+const {
+  TOKEN_2022_PROGRAM_ID,
+  getMintLen,
+  ExtensionType,
+  createInitializeMintInstruction,
+  createInitializeInterestBearingMintInstruction,
+} = require("@solana/spl-token");
 
 // Define the path to id.json and Load wallet
 const secretKeyPath = `${os.homedir()}/.config/solana/id.json`;
@@ -12,28 +17,66 @@ const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 // Initialize connection to Solana devnet
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-async function createMintAccount() {
+async function createInterestBearingMintAccount() {
   try {
-    const mintAuthority = payer.publicKey; // Authority that can mint new tokens
-    const decimals = 2; // Decimals for the new mint account
+    const mintAuthority = payer.publicKey;
+    const rateAuthority = payer;
+    const decimals = 2;
+    const rate = 100; // Example rate basis points (1%)
 
-    console.log("Creating mint account...");
-    const mint = await createMint(
-      connection,
-      payer, // Payer of the transaction
-      mintAuthority, // Mint Authority
-      null, // Optional Freeze Authority
-      decimals, // Decimals of Mint
-      undefined, // Optional keypair
-      undefined, // Options for confirming the transaction
-      TOKEN_2022_PROGRAM_ID // Token Extension Program ID
+    // Calculate required space for the mint account
+    const mintLen = getMintLen([ExtensionType.InterestBearingConfig]);
+    const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+
+    // Generate new keypair for the mint account
+    const mintKeypair = Keypair.generate();
+
+    // Create the mint account with the necessary space and funding
+    const createAccountInstruction = SystemProgram.createAccount({
+      fromPubkey: payer.publicKey,
+      newAccountPubkey: mintKeypair.publicKey,
+      space: mintLen,
+      lamports,
+      programId: TOKEN_2022_PROGRAM_ID,
+    });
+
+    // Initialize the interest-bearing extension
+    const initializeInterestBearingMintInstruction = createInitializeInterestBearingMintInstruction(
+      mintKeypair.publicKey,
+      rateAuthority.publicKey,
+      rate,
+      TOKEN_2022_PROGRAM_ID
     );
 
-    console.log("Mint account created:", mint.toBase58());
-    return mint; // Return the mint public key
+    // Initialize the mint
+    const initializeMintInstruction = createInitializeMintInstruction(
+      mintKeypair.publicKey,
+      decimals,
+      mintAuthority,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    );
+
+    // Create transaction with ordered instructions
+    const transaction = new Transaction().add(
+      createAccountInstruction,
+      initializeInterestBearingMintInstruction,
+      initializeMintInstruction
+    );
+
+    const transactionSignature = await sendAndConfirmTransaction(
+      connection,
+      transaction,
+      [payer, mintKeypair]
+    );
+
+    console.log("Mint account created:", mintKeypair.publicKey.toBase58());
+    console.log("Transaction signature:", transactionSignature);
+    return mintKeypair.publicKey;
+
   } catch (error) {
-    console.error("Error creating mint account:", error);
+    console.error("Error creating interest-bearing mint account:", error);
   }
 }
 
-createMintAccount();
+createInterestBearingMintAccount();
