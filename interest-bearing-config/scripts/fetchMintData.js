@@ -1,7 +1,5 @@
-// fetchMintData.js
 const { Connection, clusterApiUrl, PublicKey } = require("@solana/web3.js");
 const { getMint, TOKEN_2022_PROGRAM_ID } = require("@solana/spl-token");
-
 
 // Initialize connection to Solana devnet
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -22,6 +20,6 @@ async function fetchMintData(mint) {
   }
 }
 
-const mint = new PublicKey("6Fxvb1ZVcp5V4VdAgTr4ksCFfvbKC46iJqZEV9qvZjjq"); // Replace with your mint public key
+const mint = new PublicKey("H5tjqzE9FVMxdUKZbzBvFeX7s1AExPzarLLJfDtKFq2j"); // Replace with your mint public key
 
 fetchMintData(mint);
