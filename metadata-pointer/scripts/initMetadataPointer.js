@@ -12,7 +12,7 @@ async function initializeMetadataPointer(mint, updateAuthority) {
     )
   );
 
-  const transactionSignature = await connection.sendTransaction(transaction, [payer]);
+  const transactionSignature = await sendAndConfirmTransaction(connection, transaction, [payer]);
 
   console.log(`\nMetadata Pointer Initialized: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`);
 }

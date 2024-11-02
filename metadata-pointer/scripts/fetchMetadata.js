@@ -1,10 +1,9 @@
-// fetchMetadata.js
 const { getTokenMetadata } = require("@solana/spl-token-metadata");
 const { connection } = require("./initConnection");
 
 async function fetchMetadata(mint) {
   const metadata = await getTokenMetadata(connection, mint);
-  console.log("\nFetched Metadata:", JSON.stringify(metadata, null, 2));
+  return metadata;
 }
 
 module.exports = { fetchMetadata };
