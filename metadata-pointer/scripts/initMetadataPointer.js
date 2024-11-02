@@ -1,6 +1,6 @@
-// initializeMetadataPointer.js
 const { createInitializeMetadataPointerInstruction } = require("@solana/spl-token");
-const { connection, payer } = require("./initializeConnection");
+const { sendAndConfirmTransaction, Transaction } = require("@solana/web3.js");
+const { connection, payer } = require("./initConnection");
 
 async function initializeMetadataPointer(mint, updateAuthority) {
   const transaction = new Transaction().add(

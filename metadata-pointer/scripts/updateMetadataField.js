@@ -1,6 +1,6 @@
 // updateMetadataField.js
 const { createUpdateFieldInstruction } = require("@solana/spl-token-metadata");
-const { connection, payer } = require("./initializeConnection");
+const { connection, payer } = require("./initConnection");
 
 async function updateMetadataField(mint, updateAuthority, field, value) {
   const transaction = new Transaction().add(

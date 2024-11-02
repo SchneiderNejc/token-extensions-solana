@@ -1,7 +1,7 @@
 // createMintAccount.js
 const { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction, clusterApiUrl, Connection } = require("@solana/web3.js");
 const { TOKEN_2022_PROGRAM_ID, ExtensionType, getMintLen } = require("@solana/spl-token");
-const { connection, payer } = require("./initializeConnection");
+const { connection, payer } = require("./initConnection");
 
 
 async function createMintAccount(decimals, mintAuthority) {

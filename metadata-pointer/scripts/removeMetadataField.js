@@ -1,6 +1,6 @@
 // removeMetadataField.js
 const { createRemoveKeyInstruction } = require("@solana/spl-token-metadata");
-const { connection, payer } = require("./initializeConnection");
+const { connection, payer } = require("./initConnection");
 
 async function removeMetadataField(mint, updateAuthority, key) {
   const transaction = new Transaction().add(
