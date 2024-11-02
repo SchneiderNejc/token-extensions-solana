@@ -1,30 +1,32 @@
 const fs = require('fs');
+const path = require("path");
+
 const { createMintAccount } = require('./scripts/createMintAccount');
 const { initializeMetadataPointer } = require('./scripts/initMetadataPointer');
 const { initializeMetadata } = require('./scripts/initMetadata');
 const { updateMetadataField } = require('./scripts/updateMetadataField');
 const { removeMetadataField } = require('./scripts/removeMetadataField');
 const { fetchMetadata } = require('./scripts/fetchMetadata');
-const { connection, payer } = require('./scripts/initConnection');
+const { payer } = require('./scripts/initConnection');
 
 // Command-line arguments: node main.js <command> [parameters...]
 const command = process.argv[2];
 
-// Function to save output to a file
-const saveOutputToFile = (filename, data) => {
-    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
-};
+// Ensure the output directory exists
+const outputDir = path.join(__dirname, "output");
+if (!fs.existsSync(outputDir)){
+    fs.mkdirSync(outputDir);
+}
 
 const runScript = async () => {
     let mint, updateAuthority;
 
     switch (command) {
         case 'createMint':
-            const mintAccount = await createMintAccount();
-            mint = mintAccount.mint.toBase58();
-            console.log(`Mint Account Created: ${mint}`);
-            saveOutputToFile('output/mint.txt', { mint });
-            break;
+          mint = await createMintAccount();
+          fs.writeFileSync(path.join(outputDir, "mint.txt"), mint.toBase58());
+          console.log(`Mint address saved to ${outputDir}/mint.txt`);
+          break;
 
         case 'initPointer':
             mint = process.argv[3]; // Get mint from arguments
@@ -54,8 +56,8 @@ const runScript = async () => {
         case 'fetchMetadata':
             mint = process.argv[3]; // Get mint from arguments
             const metadata = await fetchMetadata(mint);
-            console.log("Fetched Metadata:", metadata);
-            saveOutputToFile('output/metadata.txt', metadata);
+            fs.writeFileSync(path.join(outputDir, "metadata.json"), JSON.stringify(metadata, null, 2));
+            console.log(`Metadata saved to ${outputDir}/metadata.json`);
             break;
 
         default:
