@@ -1,9 +1,8 @@
 const fs = require('fs');
 const path = require("path");
 
-const { createMintAccount } = require('./scripts/createMintAccount');
+const { createMint } = require('./scripts/createMint');
 const { initializeMetadataPointer } = require('./scripts/initMetadataPointer');
-const { initializeMetadata } = require('./scripts/initMetadata');
 const { updateMetadataField } = require('./scripts/updateMetadataField');
 const { removeMetadataField } = require('./scripts/removeMetadataField');
 const { fetchMetadata } = require('./scripts/fetchMetadata');
