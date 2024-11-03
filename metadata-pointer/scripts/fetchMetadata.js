@@ -1,4 +1,4 @@
-const { getTokenMetadata } = require("@solana/spl-token-metadata");
+const { getTokenMetadata } = require("@solana/spl-token");
 const { connection } = require("./initConnection");
 
 async function fetchMetadata(mint) {
