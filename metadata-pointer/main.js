@@ -23,8 +23,8 @@ const runScript = async () => {
 
     switch (command) {
         case 'createMint':
-          mint = await createMintAccount();
-          fs.writeFileSync(path.join(outputDir, "mint.txt"), mint.toBase58());
+          mint = await createMint();
+          fs.writeFileSync(path.join(outputDir, "mint.txt"), mint.toString());
           console.log(`Mint address saved to ${outputDir}/mint.txt`);
           break;
 
