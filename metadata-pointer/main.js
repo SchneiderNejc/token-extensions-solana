@@ -33,12 +33,6 @@ const runScript = async () => {
             await initializeMetadataPointer(mint, updateAuthority);
             break;
 
-        case 'initMetadata':
-            mint = process.argv[3]; // Get mint from arguments
-            updateAuthority = payer.publicKey; // Default update authority
-            await initializeMetadata(mint, updateAuthority);
-            break;
-
         case 'updateField':
             mint = process.argv[3]; // Get mint from arguments
             const field = process.argv[4];
