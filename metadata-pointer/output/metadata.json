@@ -1,0 +1,17 @@
+{
+  "updateAuthority": "6ZJDfSVjffvRYbtpFF33PSeYWNYJnbtMKiwWVt1YRjZW",
+  "mint": "DodV53TZ8DZ8Mfu6qnZGTrTtwcdBb51zFanMzZQeS2gR",
+  "name": "YourToken",
+  "symbol": "SMBL",
+  "uri": "https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/DeveloperPortal/metadata.json",
+  "additionalMetadata": [
+    [
+      "new-field",
+      "old-value"
+    ],
+    [
+      "new-field3",
+      "updated-value2"
+    ]
+  ]
+}
