@@ -1,8 +1,10 @@
 const { getTokenMetadata } = require("@solana/spl-token");
 const { connection } = require("./initConnection");
+const { PublicKey } = require("@solana/web3.js");
 
 async function fetchMetadata(mint) {
-  const metadata = await getTokenMetadata(connection, mint);
+  const mintPublicKey = new PublicKey(mint); // Convert mint to PublicKey
+  const metadata = await getTokenMetadata(connection, mintPublicKey);
   return metadata;
 }
 
