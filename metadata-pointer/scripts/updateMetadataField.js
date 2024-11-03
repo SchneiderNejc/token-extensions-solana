@@ -1,4 +1,4 @@
-const { createUpdateFieldInstruction } = require("@solana/spl-token-metadata");
+const { createUpdateFieldInstruction, TOKEN_2022_PROGRAM_ID } = require("@solana/spl-token");
 const { sendAndConfirmTransaction, Transaction } = require("@solana/web3.js");
 const { connection, payer } = require("./initConnection");
 
