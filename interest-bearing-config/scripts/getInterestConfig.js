@@ -1,6 +1,3 @@
-// getInterestConfig.js
-const fs = require("fs");
-const os = require("os");
 const { Connection, clusterApiUrl, PublicKey } = require("@solana/web3.js");
 const { getInterestBearingMintConfigState, getMint, TOKEN_2022_PROGRAM_ID } = require("@solana/spl-token");
 
