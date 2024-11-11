@@ -34,6 +34,12 @@ const initialMintAmount = 200;
 const transferAmount = 100;
 const burnAmount = 100;
 
+
+// Utility function to save addresses to file
+function saveAddressToFile(filename, address) {
+  fs.writeFileSync(filename, address, "utf8");
+  console.log(`Saved ${address} to ${filename}`);
+}
 (async () => {
   // Call the desired functions by uncommenting them
   await createMint();
@@ -85,6 +91,9 @@ const burnAmount = 100;
     console.log(
       `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
     );
+
+    // Save mint address to file
+    saveAddressToFile("mint_address.txt", mint.toBase58());
   }
 
   async function createTA() {
@@ -110,6 +119,9 @@ const burnAmount = 100;
       undefined,
       TOKEN_2022_PROGRAM_ID
     );
+    // Save token account address to file
+    saveAddressToFile("token_address.txt", token.toBase58());
+  }
 
     const transactionSignature = await mintTo(
       connection,
