@@ -34,23 +34,27 @@ const initialMintAmount = 200;
 const transferAmount = 100;
 const burnAmount = 100;
 
+// Global variables for mint and token addresses
+let mint;
+let token;
 
 // Utility function to save addresses to file
 function saveAddressToFile(filename, address) {
   fs.writeFileSync(filename, address, "utf8");
   console.log(`Saved ${address} to ${filename}`);
 }
+
+// Call the desired functions by uncommenting them
 (async () => {
-  // Call the desired functions by uncommenting them
   await createMint();
-  // await createTA();
-  // await mint();
-  // await transfer();
-  // await burn();
+  await createTA();
+  await mintTokens();
+  await transferTokens();
+  await burnTokens();
 
   async function createMint() {
     const mintKeypair = Keypair.generate();
-    const mint = mintKeypair.publicKey;
+    mint = mintKeypair.publicKey;
     const mintAuthority = payer;
     const freezeAuthority = payer;
     const extensions = [ExtensionType.NonTransferable];
@@ -97,7 +101,7 @@ function saveAddressToFile(filename, address) {
   }
 
   async function createTA() {
-    const destinationTokenAccount = await createAccount(
+    token = await createAccount(
       connection,
       payer,
       mint,
@@ -106,29 +110,19 @@ function saveAddressToFile(filename, address) {
       undefined,
       TOKEN_2022_PROGRAM_ID
     );
-    console.log("Created Token Account:", destinationTokenAccount.toBase58());
-  }
+    console.log("Created Token Account:", token.toBase58());
 
-  async function mint() {
-    const sourceTokenAccount = await createAccount(
-      connection,
-      payer,
-      mint,
-      payer.publicKey,
-      undefined,
-      undefined,
-      TOKEN_2022_PROGRAM_ID
-    );
     // Save token account address to file
     saveAddressToFile("token_address.txt", token.toBase58());
   }
 
+  async function mintTokens() {
     const transactionSignature = await mintTo(
       connection,
-      payer,
-      mint,
-      sourceTokenAccount,
-      mintAuthority,
+      payer, // Transaction fee payer
+      mint, // Mint account
+      token, // Existing token account from previous step
+      payer, // Mint authority
       initialMintAmount,
       undefined,
       undefined,
@@ -141,17 +135,8 @@ function saveAddressToFile(filename, address) {
     );
   }
 
-  async function transfer() {
-    const sourceTokenAccount = await createAccount(
-      connection,
-      payer,
-      mint,
-      payer.publicKey,
-      undefined,
-      undefined,
-      TOKEN_2022_PROGRAM_ID
-    );
-
+  async function transferTokens() {
+    // Destination token account (e.g., can be created here or fetched from another source)
     const destinationTokenAccount = await createAccount(
       connection,
       payer,
@@ -165,7 +150,7 @@ function saveAddressToFile(filename, address) {
     const transactionSignature = await transferChecked(
       connection,
       payer,
-      sourceTokenAccount,
+      token, // Source token account from previous step
       mint,
       destinationTokenAccount,
       payer,
@@ -182,21 +167,11 @@ function saveAddressToFile(filename, address) {
     );
   }
 
-  async function burn() {
-    const sourceTokenAccount = await createAccount(
-      connection,
-      payer,
-      mint,
-      payer.publicKey,
-      undefined,
-      undefined,
-      TOKEN_2022_PROGRAM_ID
-    );
-
+  async function burnTokens() {
     const transactionSignature = await burnChecked(
       connection,
       payer,
-      sourceTokenAccount,
+      token, // Source token account from previous step
       mint,
       payer,
       burnAmount,
