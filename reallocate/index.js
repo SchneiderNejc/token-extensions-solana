@@ -49,8 +49,8 @@ const decimals = 9;
     TOKEN_2022_PROGRAM_ID
   );
 
-  // Reallocate, enable memo transfer extension.
-  const extensions = [ExtensionType.MemoTransfer];
+  // Reallocate, enable memo transfer and cpi guardextension.
+  const extensions = [ExtensionType.MemoTransfer, ExtensionType.CpiGuard];
   const transaction = new Transaction().add(
     createReallocateInstruction(
       account,
@@ -61,9 +61,9 @@ const decimals = 9;
       TOKEN_2022_PROGRAM_ID
     ),
     createEnableRequiredMemoTransfersInstruction(
-      account,
-      owner.publicKey,
-      [],
+      account, // Token Account address
+      owner.publicKey, // Token Account Owner
+      [], // Additional signers
       TOKEN_2022_PROGRAM_ID
     )
   );
