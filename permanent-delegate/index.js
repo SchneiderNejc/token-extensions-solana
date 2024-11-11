@@ -9,8 +9,9 @@ const {
 } = require("@solana/web3.js");
 const {
   createInitializeMintInstruction,
-  createInitializeNonTransferableMintInstruction,
-  createAccount,
+  createInitializePermanentDelegateInstruction,
+  getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
   mintTo,
   transferChecked,
   burnChecked,
@@ -21,6 +22,12 @@ const {
 const os = require("os");
 const fs = require("fs");
 
+// Utility function to save addresses to file
+function saveAddressToFile(filename, address) {
+  fs.writeFileSync(filename, address, "utf8");
+  console.log(`Saved ${address} to ${filename}`);
+}
+
 // Connection and Keypair setup
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const secretKey = JSON.parse(
@@ -28,36 +35,31 @@ const secretKey = JSON.parse(
 );
 const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 
+// Global variables for mint and token addresses
+let mint = new PublicKey("AA9udmyZnvGMR5CNkB28UAfAqYQwzcEPKTTqhugYjDSH");
+let token = new PublicKey("J1P8xtWTV2a9mvVJqbnop42R6Tno5RbYKYdgwTVwhWzG");
+
 // Parameters for token setup
 const mintDecimals = 9;
 const initialMintAmount = 200;
 const transferAmount = 100;
 const burnAmount = 100;
 
-// Global variables for mint and token addresses
-let mint;
-let token;
-
-// Utility function to save addresses to file
-function saveAddressToFile(filename, address) {
-  fs.writeFileSync(filename, address, "utf8");
-  console.log(`Saved ${address} to ${filename}`);
-}
-
-// Call the desired functions by uncommenting them
+// @note Uncomment the methods to execute them.
 (async () => {
-  await createMint();
-  await createTA();
-  await mintTokens();
-  await transferTokens();
-  await burnTokens();
+  // await createMint();
+  // await createTA();
+  // await mintTokens();
+  // await transferTokens();
+  // await burnTokens();
 
   async function createMint() {
     const mintKeypair = Keypair.generate();
     mint = mintKeypair.publicKey;
     const mintAuthority = payer;
-    const freezeAuthority = payer;
-    const extensions = [ExtensionType.NonTransferable];
+    const permanentDelegate = payer;
+
+    const extensions = [ExtensionType.PermanentDelegate];
     const mintLen = getMintLen(extensions);
     const lamports = await connection.getMinimumBalanceForRentExemption(
       mintLen
@@ -68,29 +70,28 @@ function saveAddressToFile(filename, address) {
         fromPubkey: payer.publicKey,
         newAccountPubkey: mint,
         space: mintLen,
-        lamports,
+        lamports: lamports,
         programId: TOKEN_2022_PROGRAM_ID,
       }),
-      createInitializeNonTransferableMintInstruction(
+      createInitializePermanentDelegateInstruction(
         mint,
+        permanentDelegate.publicKey,
         TOKEN_2022_PROGRAM_ID
       ),
       createInitializeMintInstruction(
         mint,
-        mintDecimals,
+        9,
         mintAuthority.publicKey,
-        freezeAuthority.publicKey,
+        null,
         TOKEN_2022_PROGRAM_ID
       )
     );
-
     const transactionSignature = await sendAndConfirmTransaction(
       connection,
       transaction,
       [payer, mintKeypair],
       undefined
     );
-
     console.log(`\nMint Account Address: ${mint}`);
     console.log(
       `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
@@ -101,16 +102,32 @@ function saveAddressToFile(filename, address) {
   }
 
   async function createTA() {
-    token = await createAccount(
-      connection,
-      payer,
+    // Get the associated token address
+    token = await getAssociatedTokenAddress(
       mint,
       payer.publicKey,
-      undefined,
-      undefined,
+      false,
       TOKEN_2022_PROGRAM_ID
     );
-    console.log("Created Token Account:", token.toBase58());
+
+    // Check if the associated token account already exists
+    const accountInfo = await connection.getAccountInfo(token);
+    if (accountInfo === null) {
+      // Account does not exist; create it
+      const transaction = new Transaction().add(
+        createAssociatedTokenAccountInstruction(
+          payer.publicKey, // Payer
+          token, // New associated token account address
+          payer.publicKey, // Owner of the new token account
+          mint, // Mint
+          TOKEN_2022_PROGRAM_ID // Use TOKEN_2022_PROGRAM_ID if intended
+        )
+      );
+      await sendAndConfirmTransaction(connection, transaction, [payer]);
+      console.log("Created Token Account:", token.toBase58());
+    } else {
+      console.log("Token Account already exists:", token.toBase58());
+    }
 
     // Save token account address to file
     saveAddressToFile("token_address.txt", token.toBase58());
@@ -129,21 +146,18 @@ function saveAddressToFile(filename, address) {
       TOKEN_2022_PROGRAM_ID
     );
 
+    console.log(`\nMinted ${initialMintAmount} Tokens.`);
     console.log(
-      "\nMint Tokens:",
-      `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+      `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
     );
   }
 
   async function transferTokens() {
-    // Destination token account (e.g., can be created here or fetched from another source)
-    const destinationTokenAccount = await createAccount(
-      connection,
-      payer,
+    // Get the associated token account for the recipient
+    const destinationTokenAccount = await getAssociatedTokenAddress(
       mint,
-      payer.publicKey,
-      undefined,
-      undefined,
+      payer.publicKey, // Update if different recipient is intended
+      false,
       TOKEN_2022_PROGRAM_ID
     );
 
@@ -161,9 +175,9 @@ function saveAddressToFile(filename, address) {
       TOKEN_2022_PROGRAM_ID
     );
 
+    console.log(`\nTransfered ${initialMintAmount} Tokens.`);
     console.log(
-      "\nTransfer Tokens:",
-      `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+      `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
     );
   }
 
@@ -181,9 +195,9 @@ function saveAddressToFile(filename, address) {
       TOKEN_2022_PROGRAM_ID
     );
 
+    console.log(`\nBurned ${burnAmount} Tokens.`);
     console.log(
-      "\nBurn Tokens:",
-      `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+      `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
     );
   }
 })();
