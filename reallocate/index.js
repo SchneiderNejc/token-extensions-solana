@@ -49,7 +49,7 @@ const decimals = 9;
     TOKEN_2022_PROGRAM_ID
   );
 
-  // Reallocate, enable memo transfer and cpi guardextension.
+  // Reallocate, enable memo transfer and cpi guard extension.
   const extensions = [ExtensionType.MemoTransfer, ExtensionType.CpiGuard];
   const transaction = new Transaction().add(
     createReallocateInstruction(
