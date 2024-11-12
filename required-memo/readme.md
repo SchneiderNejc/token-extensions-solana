@@ -6,7 +6,8 @@ This feature is particularly useful for adding context to transactions, making i
 Traditional banking systems typically require a memo to accompany all transfers. By enabling required memo transfers on your token account, the program enforces that all incoming transfers must have an accompanying memo instruction right before the transfer instruction.
 
 Scripts
-
+createMint.js	Creates mint and TA with memo
+enableMemo.js	Enable/Disable memo for created TA.
 
 CLI
 Create account with required memo transfers
