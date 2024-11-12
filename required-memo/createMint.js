@@ -1,20 +1,19 @@
-import {
+const {
   clusterApiUrl,
   sendAndConfirmTransaction,
   Connection,
   Keypair,
   SystemProgram,
   Transaction,
-  LAMPORTS_PER_SOL,
-} from "@solana/web3.js";
-import {
+} = require("@solana/web3.js");
+const {
   createMint,
   createEnableRequiredMemoTransfersInstruction,
   createInitializeAccountInstruction,
   getAccountLen,
   ExtensionType,
   TOKEN_2022_PROGRAM_ID,
-} from "@solana/spl-token";
+} = require("@solana/spl-token");
 const os = require("os");
 const fs = require("fs");
 
@@ -27,6 +26,7 @@ const mintAuthority = payer;
 const decimals = 9;
 
 (async () => {
+  // Create mint.
   const mint = await createMint(
     connection,
     payer,
@@ -43,38 +43,40 @@ const decimals = 9;
     accountLen
   );
 
-  const owner = Keypair.generate();
-  const destinationKeypair = Keypair.generate();
-  const destination = destinationKeypair.publicKey;
+  // Build tx using create TA, initTA, enable memo on TA.
+  const owner = payer;
+  const tokenKeypair = Keypair.generate();
+  const token = tokenKeypair.publicKey;
   const transaction = new Transaction().add(
     SystemProgram.createAccount({
       fromPubkey: payer.publicKey,
-      newAccountPubkey: destination,
+      newAccountPubkey: token,
       space: accountLen,
       lamports,
       programId: TOKEN_2022_PROGRAM_ID,
     }),
     createInitializeAccountInstruction(
-      destination,
+      token,
       mint,
       owner.publicKey,
       TOKEN_2022_PROGRAM_ID
     ),
     createEnableRequiredMemoTransfersInstruction(
-      destination,
+      token,
       owner.publicKey,
       [],
       TOKEN_2022_PROGRAM_ID
     )
   );
-
-  await sendAndConfirmTransaction(
+  const transactionSignature = await sendAndConfirmTransaction(
     connection,
     transaction,
-    [payer, owner, destinationKeypair],
+    [payer, owner, tokenKeypair],
     undefined
   );
 
+  console.log("\nMint Account:", mint.toBase58());
+  console.log("Token Account:", token.toBase58());
   console.log(
     `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
   );
