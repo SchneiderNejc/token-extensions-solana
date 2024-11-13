@@ -13,34 +13,52 @@ const {
 } = require("@solana/spl-token");
 const os = require("os");
 const fs = require("fs");
+const path = require("path");
 
 // Setup connection & connect wallet.
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const secretKey = JSON.parse(
   fs.readFileSync(`${os.homedir()}/.config/solana/id.json`, "utf8")
 );
-
-// Mint params.
-const mint = new PublicKey("FRyKjBBLnru1WAThr5bM7UfZygkP25y4u9iVtAwHqZX8");
 const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
+const mint = new PublicKey("FRyKjBBLnru1WAThr5bM7UfZygkP25y4u9iVtAwHqZX8");
+const dataPath = path.join(__dirname, "token_accounts.json");
 
+// Main functon.
 (async () => {
-  // Get or create sender's TA.
-  let owner = payer;
+  // Get or create sender's TA
+  const senderTA = await getOrCreateATA(payer);
 
-  // ----------------- @todo move the code section into seperate helper function since it repeats twice. -----------
-  // ----------------------- Call the function getOrCreateATA(owner)------------------------------------------------------------
+  // Get or create receiver's wallet and TA
+  const receiverKeypair = getOrCreateReceiverWallet();
+  const receiverTA = await getOrCreateATA(receiverKeypair);
+
+  // Save sender's ATA, receiver's ATA, and receiver's wallet secret to JSON
+  const data = {
+    sender: {
+      taAddress: senderTA.toBase58(),
+    },
+    receiver: {
+      taAddress: receiverTA.toBase58(),
+      walletAddress: receiverKeypair.publicKey.toBase58(),
+      walletSecret: Array.from(receiverKeypair.secretKey),
+    },
+  };
+
+  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+  console.log("Token accounts created or retrieved, and data saved to JSON.");
+})();
+
+// Helper function to get or create an associated token account
+async function getOrCreateATA(owner) {
   let associatedTokenAddress = await getAssociatedTokenAddress(
     mint,
     owner.publicKey,
-    false, // do not allow the program to create an account
-    TOKEN_2022_PROGRAM_ID // Use TOKEN_2022_PROGRAM_ID for mints with extensions
+    false,
+    TOKEN_2022_PROGRAM_ID
   );
 
-  // Attempt to retrieve the account info
   let accountInfo = await connection.getAccountInfo(associatedTokenAddress);
-
-  // Print TA address for existing account or create a new one.
   if (accountInfo) {
     console.log(
       "Associated Token Account exists at:",
@@ -63,56 +81,26 @@ const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
       associatedTokenAddress.toBase58()
     );
   }
-  // ----------------- End of the section. --------------------------------------------------
+  return associatedTokenAddress;
+}
 
-  // Get or create Receiver's TA.
-  receiverKeypair = Keypair.generate(); // @todo look into file system (csv) if receiverKeypair exists. If yes, use it. If not, generate it.
-  owner = receiverKeypair;
-  associatedTokenAddress = await getAssociatedTokenAddress(
-    mint,
-    owner.publicKey,
-    false, // do not allow the program to create an account
-    TOKEN_2022_PROGRAM_ID // Use TOKEN_2022_PROGRAM_ID for mints with extensions
+// Function to get existing receiver wallet from JSON or create a new Keypair
+function getOrCreateReceiverWallet() {
+  if (fs.existsSync(dataPath)) {
+    const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+    const receiverWallet = data.receiver?.walletSecret;
+    if (receiverWallet) {
+      console.log(
+        "Found existing receiver wallet:",
+        data.receiver.walletAddress
+      );
+      return Keypair.fromSecretKey(new Uint8Array(receiverWallet));
+    }
+  }
+  const receiverKeypair = Keypair.generate();
+  console.log(
+    "New receiver wallet generated:",
+    receiverKeypair.publicKey.toBase58()
   );
-
-  // Attempt to retrieve the account info
-  accountInfo = await connection.getAccountInfo(associatedTokenAddress);
-  // Print TA address for existing account or create a new one.
-  if (accountInfo) {
-    console.log(
-      "Associated Token Account exists at:",
-      associatedTokenAddress.toBase58()
-    );
-  } else {
-    console.log("Associated Token Account does not exist. Creating...");
-    const transaction = new Transaction().add(
-      createAssociatedTokenAccountInstruction(
-        payer.publicKey,
-        associatedTokenAddress,
-        owner.publicKey,
-        mint,
-        TOKEN_2022_PROGRAM_ID
-      )
-    );
-    await sendAndConfirmTransaction(connection, transaction, [payer]);
-    console.log(
-      "Associated Token Account created at:",
-      associatedTokenAddress.toBase58()
-    );
-  }
-
-  // // Save addresses to CSV.
-  const addresses = [
-    { type: "Sender", address: senderTA.address.toBase58() },
-    // @todo also save receiver wallet address, if created for the first time.
-    { type: "Receiver", address: receiverTA.address.toBase58() },
-  ];
-
-  const csvData = addresses
-    .map((row) => `${row.type},${row.address}`)
-    .join("\n");
-
-  fs.writeFileSync("token_accounts.csv", csvData);
-
-  console.log("Token accounts created or retrieved.");
-})();
+  return receiverKeypair;
+}
