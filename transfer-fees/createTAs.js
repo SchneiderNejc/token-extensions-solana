@@ -20,10 +20,11 @@ const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const secretKey = JSON.parse(
   fs.readFileSync(`${os.homedir()}/.config/solana/id.json`, "utf8")
 );
-const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
-const mint = new PublicKey("FRyKjBBLnru1WAThr5bM7UfZygkP25y4u9iVtAwHqZX8");
 const dataPath = path.join(__dirname, "token_accounts.json");
+const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 
+// @note Update the mint address.
+const mint = new PublicKey("FRyKjBBLnru1WAThr5bM7UfZygkP25y4u9iVtAwHqZX8");
 // Main functon.
 (async () => {
   // Get or create sender's TA
