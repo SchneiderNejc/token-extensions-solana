@@ -20,12 +20,25 @@ const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const secretKey = JSON.parse(
   fs.readFileSync(`${os.homedir()}/.config/solana/id.json`, "utf8")
 );
-const dataPath = path.join(__dirname, "token_accounts.json");
+const dataPath = path.join(__dirname, "accounts.json");
 const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 
-// @note Update the mint address.
-const mint = new PublicKey("FRyKjBBLnru1WAThr5bM7UfZygkP25y4u9iVtAwHqZX8");
-// Main functon.
+// Load mint address from accounts.json or log error if it doesn't exist
+let mint;
+if (fs.existsSync(dataPath)) {
+  const accountData = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+  if (accountData.mintAddress) {
+    mint = new PublicKey(accountData.mintAddress);
+  } else {
+    console.error("Mint account not found. Run createMint.js first.");
+    process.exit(1);
+  }
+} else {
+  console.error("accounts.json file not found. Run createMint.js first.");
+  process.exit(1);
+}
+
+// Main function.
 (async () => {
   // Get or create sender's TA
   const senderTA = await getOrCreateATA(payer);
@@ -36,6 +49,7 @@ const mint = new PublicKey("FRyKjBBLnru1WAThr5bM7UfZygkP25y4u9iVtAwHqZX8");
 
   // Save sender's ATA, receiver's ATA, and receiver's wallet secret to JSON
   const data = {
+    mintAddress: mint.toBase58(), // Ensure the mint address is saved back to the file
     sender: {
       taAddress: senderTA.toBase58(),
     },
