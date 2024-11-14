@@ -15,6 +15,7 @@ const {
 } = require("@solana/spl-token");
 const os = require("os");
 const fs = require("fs");
+const path = require("path");
 
 // Setup connection & connect wallet.
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -34,6 +35,9 @@ const transferFeeConfigAuthority = payer;
 const withdrawWithheldAuthority = payer;
 const feeBasisPoints = 50; // 5%
 const maxFee = BigInt(5_000);
+
+// Path to save mint information
+const dataPath = path.join(__dirname, "accounts.json");
 
 (async () => {
   // Calculate account size.
@@ -68,6 +72,7 @@ const maxFee = BigInt(5_000);
       TOKEN_2022_PROGRAM_ID
     )
   );
+
   const transactionSignature = await sendAndConfirmTransaction(
     connection,
     mintTransaction,
@@ -79,4 +84,16 @@ const maxFee = BigInt(5_000);
   console.log(
     `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
   );
+
+  // Save the mint address to accounts.json
+  const data = {
+    mintAddress: mint.toBase58(),
+    mintAuthority: mintAuthority.publicKey.toBase58(),
+    decimals: decimals,
+    transactionSignature: transactionSignature,
+  };
+
+  // Write to JSON file
+  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+  console.log("Mint address and related data saved to accounts.json.");
 })();
