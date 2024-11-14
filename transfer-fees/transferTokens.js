@@ -1,105 +1,88 @@
 const {
   clusterApiUrl,
-  transferCheckedWithFee,
   Connection,
   Keypair,
   PublicKey,
 } = require("@solana/web3.js");
 const {
-  createAccount,
-  mintTo,
-  TOKEN_2022_PROGRAM_ID,
   getAssociatedTokenAddress,
+  transferCheckedWithFee,
+  TOKEN_2022_PROGRAM_ID,
 } = require("@solana/spl-token");
 const os = require("os");
 const fs = require("fs");
+const path = require("path");
 
 // Setup connection & connect wallet.
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const secretKey = JSON.parse(
   fs.readFileSync(`${os.homedir()}/.config/solana/id.json`, "utf8")
 );
-
-// Mint params.
-const mint = new PublicKey("8u8C4VB2WPKrjrUZa4KGGSin1j9gJQhJ7UmVuh8TuNWG");
 const payer = Keypair.fromSecretKey(new Uint8Array(secretKey));
 
-(async () => {
-  // Create sender's TA, mint tokens.
-  const mintAmount = BigInt(1_000_000_000);
-  const owner = payer;
-  const mintAuthority = owner;
-  const senderTA = await getAssociatedTokenAddress(
-    mint, // Mint address
-    owner.publicKey // Owner's public key
-  );
+// Load mint address and receiver public key from accounts.json
+const dataPath = path.join(__dirname, "accounts.json");
+let mint, receiverPublicKey;
 
-  const existingSenderTA = await connection.getAccountInfo(senderTA);
-  if (!existingSenderTA) {
-    console.log("doesnt exist.");
-    senderTA = await createAccount(
-      connection,
-      payer,
+try {
+  const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+  if (!data.mintAddress || !data.receiver?.walletAddress) {
+    throw new Error(
+      "Mint address or receiver public key is missing in accounts.json."
+    );
+  }
+  mint = new PublicKey(data.mintAddress);
+  receiverPublicKey = new PublicKey(data.receiver.walletAddress);
+} catch (error) {
+  console.error("Error loading data from accounts.json:", error.message);
+  process.exit(1);
+}
+
+// Transfer parameters
+const feeBasisPoints = 50; // 5%
+const transferAmount = BigInt(1_000_000);
+const decimals = 9;
+
+(async () => {
+  try {
+    // Get sender's and receiver's associated token accounts (TAs)
+    const senderTA = await getAssociatedTokenAddress(
       mint,
-      owner.publicKey,
-      undefined,
-      undefined,
+      payer.publicKey,
+      false,
       TOKEN_2022_PROGRAM_ID
     );
-    await mintTo(
+    const receiverTA = await getAssociatedTokenAddress(
+      mint,
+      receiverPublicKey,
+      false,
+      TOKEN_2022_PROGRAM_ID
+    );
+
+    // Transfer tokens from sender to receiver
+    const fee = (transferAmount * BigInt(feeBasisPoints)) / BigInt(10_000);
+    const transactionSignature = await transferCheckedWithFee(
       connection,
       payer,
-      mint,
       senderTA,
-      mintAuthority,
-      mintAmount,
+      mint,
+      receiverTA,
+      payer,
+      transferAmount,
+      decimals,
+      fee,
       [],
       undefined,
       TOKEN_2022_PROGRAM_ID
     );
-  }
 
-  // Create receiver's TA, mint tokens.
-  const receiverTA = await getAssociatedTokenAddress(
-    mint, // Mint address
-    owner.publicKey // Receiver's public key
-  );
-  const existingReceiverTA = await connection.getAccountInfo(receiverTA);
-  if (!existingReceiverTA) {
-    const receiverKeypair = Keypair.generate();
-    const receiverTA = await createAccount(
-      connection,
-      payer,
-      mint,
-      receiverKeypair.publicKey,
-      receiverKeypair,
-      undefined,
-      TOKEN_2022_PROGRAM_ID
+    console.log(
+      `${transferAmount} tokens were sent from ${senderTA.toBase58()} to ${receiverTA.toBase58()}`
     );
+    console.log(
+      `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+    );
+  } catch (error) {
+    console.error("Transfer failed:", error.message);
   }
-
-  // Transfer tokens from
-  const transferAmount = BigInt(1_000_000);
-  const fee = (transferAmount * BigInt(feeBasisPoints)) / BigInt(10_000);
-  const transactionSignature = await transferCheckedWithFee(
-    connection,
-    payer,
-    senderTA,
-    mint,
-    receiverTA,
-    owner,
-    transferAmount,
-    decimals,
-    fee,
-    [],
-    undefined,
-    TOKEN_2022_PROGRAM_ID
-  );
-
-  console.log(
-    `${transferAmount} tokens were sent from ${senderTA.toBase58()} to ${receiverTA.toBase58()}`
-  );
-  console.log(
-    `Transaction URL: https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
-  );
 })();
