@@ -8,7 +8,6 @@ const {
   mintTo,
   TOKEN_2022_PROGRAM_ID,
   getAssociatedTokenAddress,
-  getMintInfo,
 } = require("@solana/spl-token");
 const os = require("os");
 const fs = require("fs");
