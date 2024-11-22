@@ -1,5 +1,3 @@
-Source: https://solana.com/developers/guides/token-extensions/getting-started
-
 # Solana Token Extensions Guide
 
 ## Overview
@@ -65,3 +63,8 @@ Certain combinations either conflict or are impractical:
 ## Transfer Hooks
 
 Developers can replace standard transfer operations with custom logic using the **Transfer Hook Extension**.
+
+## Source
+
+- [Solana: Getting started](https://solana.com/developers/guides/token-extensions/getting-started)
+- [SPL Token Extensions](https://spl.solana.com/token-2022/extensions)
