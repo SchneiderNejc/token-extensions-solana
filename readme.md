@@ -1,42 +1,67 @@
 Source: https://solana.com/developers/guides/token-extensions/getting-started
 
-The Token Extensions program has the programID TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb 
-and is a superset of the original functionality provided by the Token Program at 
-TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA.
+# Solana Token Extensions Guide
 
-use the Solana Tool Suite to create tokens with a CLI. Based on the extension you want to create, your command flags may be different.
-Extension		CLI Flag
-Mint Close Authority	--enable-close
-Transfer Fees		--transfer-fee <basis points> <max fee>
-Non-Transferable	--enable-non-transferable
-Interest-Bearing	--interest-rate <rate>
-Permanent Delegate	--enable-permanent-delegate
-Transfer Hook		--transfer-hook <programID>
-Metadata		--enable-metadata
-Metadata Pointer	--metadata-address <accountId>
-Confidential Transfers	--enable-confidential-transfers auto
+## Overview
 
-You enable some extensions on a token account instead of the mint, which you can also find the required flags for each below.
+The **Token Extensions Program** enhances the Solana Token Program with additional functionality.
 
-Extension			CLI Flag
-Immutable Owner			Included by default
-Required Memo on Transfer	enable-required-transfer-memos
-CPI Guard			enable-cpi-guard
-Default Account State		--default-account-state <state>
+- **Token Extensions Program ID**: `TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`
+- **Original Token Program ID**: `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`
 
-Create new token
+## Token Creation with CLI
+
+Use the Solana Tool Suite CLI to create tokens with specific extensions. Below are the available extensions and their respective CLI flags:
+
+### Mint-Based Extensions
+
+| **Extension**          | **CLI Flag**                              |
+| ---------------------- | ----------------------------------------- |
+| Mint Close Authority   | `--enable-close`                          |
+| Transfer Fees          | `--transfer-fee <basis points> <max fee>` |
+| Non-Transferable       | `--enable-non-transferable`               |
+| Interest-Bearing       | `--interest-rate <rate>`                  |
+| Permanent Delegate     | `--enable-permanent-delegate`             |
+| Transfer Hook          | `--transfer-hook <programID>`             |
+| Metadata               | `--enable-metadata`                       |
+| Metadata Pointer       | `--metadata-address <accountId>`          |
+| Confidential Transfers | `--enable-confidential-transfers auto`    |
+
+### Account-Based Extensions
+
+| **Extension**             | **CLI Flag**                       |
+| ------------------------- | ---------------------------------- |
+| Immutable Owner           | Included by default                |
+| Required Memo on Transfer | `--enable-required-transfer-memos` |
+| CPI Guard                 | `--enable-cpi-guard`               |
+| Default Account State     | `--default-account-state <state>`  |
+
+---
+
+## Creating a Token Example
+
+To create a token with **Interest Rate** and **Metadata** extensions, use:
+
+```bash
 spl-token --program-id TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb \
   create-token --interest-rate 5 --enable-metadata
+```
 
+## Important Notes on Extensions
 
-##  !Most extensions cannot be added after the token mint is created.
+- **Extensions cannot be added after the token mint is created.**
 
-The following extension combinations either do not work together, or will not make sense to combine:
+### Incompatible Extension Combinations
 
-Non-transferable + (transfer hooks, transfer fees, confidential transfer)
-Confidential transfer + fees (until 1.18)
-Confidential transfer + transfer hooks (these transfers can only see source / destination accounts, therefore cannot act on the amount transferred)
-Confidential transfer + permanent delegate
+Certain combinations either conflict or are impractical:
 
-Transfer Hooks
-Instead of a normal transfer, any developer can insert custom logic into a program to be used with the transfer hook extension. 
+1. Non-transferable + (Transfer Hooks, Transfer Fees, Confidential Transfers)
+2. Confidential Transfers + Fees (until version 1.18)
+3. Confidential Transfers + Transfer Hooks (limited to source/destination accounts, without acting on transferred amounts)
+4. Confidential Transfers + Permanent Delegate
+
+---
+
+## Transfer Hooks
+
+Developers can replace standard transfer operations with custom logic using the **Transfer Hook Extension**.
